@@ -1,14 +1,18 @@
 # Melly
 
-Melly is the native Rust runtime for a live, source-controlled Linux desktop shell. Its visible interface is supplied by a separate HTML, CSS, and JavaScript repository and will be rendered through Servo on shell surfaces provided by an existing Wayland compositor.
+Melly is the native Rust runtime for a live, source-controlled Linux desktop whose developer-facing customization surface is HTML, CSS, and JavaScript. Its visible interface comes from a separate desktop-source repository and is intended to use normal web-platform behavior plus a small set of host-neutral Melly extensions.
 
-Melly is a shell runtime, **not a compositor**. It will not own DRM/KMS, window composition, XWayland, or general window-management policy.
+Melly guarantees complete programmability of the interface surface it defines through HTML, CSS, and JavaScript. It does not guarantee control of all Linux or compositor features. The runtime places Servo, Wayland, permissions, deployment, and host integration behind semantic `melly.*` APIs. Physical display ownership, DRM/KMS, global composition, and other host responsibilities remain outside the Melly contract.
+
+The native topology is not finalized. The current direction includes a rootless Wayland proxy/compositor layer for Melly-managed applications. This layer remains below the HTML/CSS/JavaScript contract and does not expose host-specific concepts to desktop source.
+
+Legacy X11 applications are host-managed through the host compositor's XWayland path from the first version and do not pass through Melly's proxy. Other application or protocol cases that Melly cannot mediate safely use the same host-managed path when authorized and supported by the host. Melly logs each declined-management decision. Host-managed applications have no guarantee of Melly chrome, events, or control.
 
 ## Status
 
 This repository is an early Rust scaffold. It currently provides a dependency-free command-line placeholder so the build, formatting, linting, and testing workflow is established before graphics or engine dependencies are introduced.
 
-The first technical milestone is a minimal Wayland layer-shell client. Servo embedding follows as a separate feasibility spike; neither is implemented yet.
+The first architectural proof will combine Wayland and Servo narrowly enough to validate one HTML-controlled native surface/window path, input, one semantic action, and live source reload. The rootless proxy direction and Servo embedding are feasibility work; neither is implemented or guaranteed yet.
 
 ## Quick start
 
@@ -25,7 +29,7 @@ cargo clippy --all-targets --all-features -- -D warnings
 
 This repository will own:
 
-- native shell-surface lifecycle and input routing;
+- native Melly surface/window lifecycle and input routing for the paths the prototypes validate;
 - the narrow Servo embedding layer;
 - the permission-checked `melly.*` JavaScript bridge;
 - compositor-neutral host capability contracts and adapters;
@@ -36,6 +40,8 @@ Desktop source does not belong here. The companion `melly-desktop` repository co
 
 ## Architecture rules
 
+- Every exposed Melly interface behavior must be controllable from HTML, CSS, and JavaScript.
+- Do not expose a semantic operation until the runtime can state and test what it guarantees. Optional host features remain capability-gated.
 - Upper layers depend on semantic capabilities, never Sway or another host's wire types.
 - Servo-specific APIs remain inside an engine boundary.
 - Repository JavaScript receives only explicitly granted native capabilities.
