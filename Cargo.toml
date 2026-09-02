@@ -1,0 +1,8 @@
+[package]
+name = "melly"
+version = "0.1.0"
+edition = "2024"
+description = "Native runtime for the Melly programmable Wayland desktop shell"
+publish = false
+
+[dependencies]
