@@ -38,8 +38,8 @@ Run the same baseline checks before proposing a change:
 
 ```sh
 cargo fmt --check
-cargo clippy --all-targets -- -D warnings
-cargo test
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
 cargo run -- --help
 ```
 
@@ -54,6 +54,19 @@ cargo clippy --locked --all-targets --all-features -- -D warnings
 Run these checks in a development environment with the native prerequisites and sufficient build storage.
 
 Use `RUST_BACKTRACE=1` while diagnosing runtime failures. Add structured logging before the first graphical prototype so engine, host-adapter, deployment, and JavaScript failures can be distinguished.
+
+## Runtime client development
+
+The shell and native application clients use `rusty-melly`. The default endpoint resolves to `$XDG_RUNTIME_DIR/melly/runtime.sock`; do not create sockets in this checkout, `/tmp`, persistent state directories, or shared storage.
+
+Keep protocol work split across these ownership boundaries:
+
+- `melly-protocol` for shared versioned wire primitives;
+- `rusty-melly` for client connection, framing, requests, events, and reconnect behavior;
+- `melly-runtime` for the server, peer credentials, identity, authorization, policy, routing, and diagnostics;
+- `melly-shell` for shell behavior through the public SDK.
+
+Tests may supply an explicit socket path inside a private temporary directory. Production code uses the standard per-login endpoint. Do not make an explicit override a permission bypass.
 
 ## Safe graphics workflow
 

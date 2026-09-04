@@ -36,6 +36,16 @@ Host compositor / operating system / hardware
 
 The public contract remains stable across changes between standard Wayland protocols, an application-facing proxy, host adapters, and other Linux subsystems.
 
+### Runtime and shell process boundary
+
+The runtime and shell communicate through a per-user Unix-domain socket at `$XDG_RUNTIME_DIR/melly/runtime.sock`. The runtime owns the socket server, client identity, authorization, capability checks, command dispatch, events, and policy. The socket is ephemeral login-session state and is not stored in a repository, installation directory, persistent data directory, or shared temporary directory.
+
+`rusty-melly` is the supported Rust client SDK for this boundary. The reference `melly-shell` uses it as an ordinary runtime client. Third-party native applications may use the same SDK to communicate directly with the runtime without routing through the shell process.
+
+Bypassing the shell does not bypass Melly. Direct clients still negotiate the versioned protocol and pass runtime identity, capability, permission, and policy checks. The shell receives no private protocol or implicit authority. Shared wire primitives belong to `melly-protocol`; client transport and ergonomics belong to `rusty-melly`; server and policy behavior belong to `melly-runtime`.
+
+The desktop HTML/CSS/JavaScript does not access the Unix socket. Its native boundary remains the permission-checked `melly.*` bridge exposed by the shell environment.
+
 ### Engine boundary
 
 The future `MellyWebEngine` abstraction owns WebView creation, rendering, input delivery, resize/focus behavior, lifecycle, and local resource loading. Only this layer tracks Servo embedding API changes. Servo supplies the ordinary HTML/CSS/JavaScript environment. Melly extensions remain within that environment and do not form a parallel UI dialect.
@@ -118,7 +128,9 @@ The runtime retains current, previous, known-good, and factory-safe recovery opt
 
 ## Dependency direction
 
-Core coordination may depend on Melly-owned engine, bridge, Wayland, host, and deployment contracts. Concrete Servo, proxy, protocol, and compositor adapters implement those contracts. Public contracts must not import implementation-specific types in the opposite direction.
+Core coordination may depend on Melly-owned engine, bridge, Wayland, host, deployment, and IPC contracts. Concrete Servo, proxy, protocol, and compositor adapters implement those contracts. Public contracts must not import implementation-specific types in the opposite direction.
+
+The shell depends on `rusty-melly`, not on runtime internals. The runtime and client SDK depend on shared `melly-protocol` wire primitives. `rusty-melly` does not depend on the reference shell, compositor adapters, or rendering-engine adapters.
 
 ## Security boundary
 

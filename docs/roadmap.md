@@ -9,11 +9,15 @@ The proposal estimates a 16–22 month MVP at roughly 8–12 focused hours per w
 - [x] Select the released Servo 0.5.0 library and commit its resolved Cargo dependency graph.
 - [x] Select Smithay 0.7.0 for the Wayland proxy boundary and Smithay Client Toolkit 0.21.1 plus swayipc 4.0.0 for the Sway host boundary.
 - [x] Establish repository ignore rules for generated Rust output and local development files.
+- [x] Split the Rust source into explicit application, core, SDK, protocol, and adapter workspace crates.
+- [x] Establish `rusty-melly` as the common client boundary for the reference shell and third-party native applications.
+- [x] Define and test resolution of the per-user `$XDG_RUNTIME_DIR/melly/runtime.sock` endpoint.
 
 ## Foundation
 
 - **Tooling and test lab:** reproducible Rust workflow, Ubuntu VM, Sway test session, logs, snapshots, and recovery access.
 - **Contract slice:** specify the smallest versioned HTML/DOM/`melly.*` environment that every supported backend must honor, including explicit preview and unsupported-operation behavior.
+- **IPC slice:** specify framing, handshake, peer identity, permission/capability enforcement, requests, events, cancellation, limits, reconnect behavior, and compatibility for `melly-protocol` and `rusty-melly`.
 - **Wayland foundations:** learn client/server/session concepts and build narrow probes for both host-facing surfaces and the application-facing proxy direction.
 - **Servo feasibility:** render and interact with one Servo WebView on a shell surface, measure resource use and latency, and decide whether the integration works without a large permanent fork.
 - **Compatibility routing:** classify applications as Melly-managed or host-managed, send X11 applications through Sway/XWayland from the start, and log every unsupported-case bypass without weakening authorization.

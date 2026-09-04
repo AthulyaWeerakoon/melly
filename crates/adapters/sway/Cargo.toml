@@ -1,0 +1,14 @@
+[package]
+name = "melly-adapter-sway"
+version.workspace = true
+edition.workspace = true
+description = "Sway host adapter for Melly"
+publish.workspace = true
+
+[features]
+default = []
+sway-ipc = ["dep:swayipc"]
+
+[dependencies]
+melly-adapter-api.workspace = true
+swayipc = { workspace = true, optional = true }

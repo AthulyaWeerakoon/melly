@@ -1,0 +1,9 @@
+[package]
+name = "melly-adapter-sqlite"
+version.workspace = true
+edition.workspace = true
+description = "SQLite persistence adapter for Melly"
+publish.workspace = true
+
+[dependencies]
+melly-adapter-api.workspace = true

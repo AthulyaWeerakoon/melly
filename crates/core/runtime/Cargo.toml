@@ -1,0 +1,10 @@
+[package]
+name = "melly-runtime"
+version.workspace = true
+edition.workspace = true
+description = "Session coordination and policy enforcement for Melly"
+publish.workspace = true
+
+[dependencies]
+melly-adapter-api.workspace = true
+melly-protocol.workspace = true

@@ -3647,10 +3647,85 @@ dependencies = [
 name = "melly"
 version = "0.1.0"
 dependencies = [
+ "melly-adapter-api",
+ "melly-adapter-servo",
+ "melly-adapter-smithay",
+ "melly-adapter-sway",
+ "melly-deployment-control",
+ "melly-runtime",
+]
+
+[[package]]
+name = "melly-adapter-api"
+version = "0.1.0"
+
+[[package]]
+name = "melly-adapter-git"
+version = "0.1.0"
+dependencies = [
+ "melly-adapter-api",
+]
+
+[[package]]
+name = "melly-adapter-linux"
+version = "0.1.0"
+dependencies = [
+ "melly-adapter-api",
+]
+
+[[package]]
+name = "melly-adapter-servo"
+version = "0.1.0"
+dependencies = [
+ "melly-adapter-api",
  "servo",
+]
+
+[[package]]
+name = "melly-adapter-smithay"
+version = "0.1.0"
+dependencies = [
+ "melly-adapter-api",
  "smithay",
  "smithay-client-toolkit",
+]
+
+[[package]]
+name = "melly-adapter-sqlite"
+version = "0.1.0"
+dependencies = [
+ "melly-adapter-api",
+]
+
+[[package]]
+name = "melly-adapter-sway"
+version = "0.1.0"
+dependencies = [
+ "melly-adapter-api",
  "swayipc",
+]
+
+[[package]]
+name = "melly-deployment-control"
+version = "0.1.0"
+
+[[package]]
+name = "melly-protocol"
+version = "0.1.0"
+
+[[package]]
+name = "melly-runtime"
+version = "0.1.0"
+dependencies = [
+ "melly-adapter-api",
+ "melly-protocol",
+]
+
+[[package]]
+name = "melly-shell"
+version = "0.1.0"
+dependencies = [
+ "rusty-melly",
 ]
 
 [[package]]
@@ -5177,6 +5252,13 @@ name = "rustversion"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
+
+[[package]]
+name = "rusty-melly"
+version = "0.1.0"
+dependencies = [
+ "melly-protocol",
+]
 
 [[package]]
 name = "same-file"

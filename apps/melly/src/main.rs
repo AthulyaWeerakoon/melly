@@ -1,9 +1,9 @@
 use std::process::ExitCode;
 
-const HELP: &str = "Melly native runtime (early scaffold)\n\n\
+const HELP: &str = "Melly native runtime (early workspace scaffold)\n\n\
 Usage:\n  melly [OPTIONS]\n\n\
 Options:\n  -h, --help       Print help\n  -V, --version    Print version\n\n\
-The runtime, Servo integration, and host backends are not implemented yet.\n\
+The runtime socket server, Servo integration, and host adapters are not implemented yet.\n\
 See docs/roadmap.md for the staged implementation plan.";
 
 fn main() -> ExitCode {

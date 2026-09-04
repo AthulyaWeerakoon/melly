@@ -1,0 +1,9 @@
+[package]
+name = "melly-adapter-git"
+version.workspace = true
+edition.workspace = true
+description = "Git revision-source adapter for Melly"
+publish.workspace = true
+
+[dependencies]
+melly-adapter-api.workspace = true

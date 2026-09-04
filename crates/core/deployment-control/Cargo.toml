@@ -1,0 +1,6 @@
+[package]
+name = "melly-deployment-control"
+version.workspace = true
+edition.workspace = true
+description = "Validated generation activation and rollback for Melly desktops"
+publish.workspace = true

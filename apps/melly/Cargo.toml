@@ -1,0 +1,25 @@
+[package]
+name = "melly"
+version.workspace = true
+edition.workspace = true
+description = "Native runtime for the Melly programmable Wayland desktop"
+publish.workspace = true
+
+[features]
+default = []
+host-sway = [
+    "dep:melly-adapter-smithay",
+    "dep:melly-adapter-sway",
+    "melly-adapter-smithay/client",
+    "melly-adapter-sway/sway-ipc",
+]
+servo-engine = ["dep:melly-adapter-servo", "melly-adapter-servo/servo-engine"]
+wayland-proxy = ["dep:melly-adapter-smithay", "melly-adapter-smithay/proxy"]
+
+[dependencies]
+melly-adapter-api.workspace = true
+melly-adapter-servo = { workspace = true, optional = true }
+melly-adapter-smithay = { workspace = true, optional = true }
+melly-adapter-sway = { workspace = true, optional = true }
+melly-deployment-control.workspace = true
+melly-runtime.workspace = true

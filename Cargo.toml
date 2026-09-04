@@ -1,18 +1,42 @@
-[package]
-name = "melly"
+[workspace]
+members = [
+    "apps/melly",
+    "crates/adapters/git",
+    "crates/adapters/linux",
+    "crates/adapters/servo",
+    "crates/adapters/smithay",
+    "crates/adapters/sqlite",
+    "crates/adapters/sway",
+    "crates/core/adapter-api",
+    "crates/core/deployment-control",
+    "crates/core/protocol",
+    "crates/core/runtime",
+    "crates/core/shell",
+    "crates/sdk/rusty-melly",
+]
+default-members = ["apps/melly"]
+resolver = "3"
+
+[workspace.package]
 version = "0.1.0"
 edition = "2024"
-description = "Native runtime for the Melly programmable Wayland desktop shell"
 publish = false
 
-[features]
-default = []
-host-sway = ["dep:smithay-client-toolkit", "dep:swayipc"]
-servo-engine = ["dep:servo"]
-wayland-proxy = ["dep:smithay"]
+[workspace.dependencies]
+melly-adapter-api = { path = "crates/core/adapter-api" }
+melly-adapter-git = { path = "crates/adapters/git" }
+melly-adapter-linux = { path = "crates/adapters/linux" }
+melly-adapter-servo = { path = "crates/adapters/servo" }
+melly-adapter-smithay = { path = "crates/adapters/smithay" }
+melly-adapter-sqlite = { path = "crates/adapters/sqlite" }
+melly-adapter-sway = { path = "crates/adapters/sway" }
+melly-deployment-control = { path = "crates/core/deployment-control" }
+melly-protocol = { path = "crates/core/protocol" }
+melly-runtime = { path = "crates/core/runtime" }
+melly-shell = { path = "crates/core/shell" }
+rusty-melly = { path = "crates/sdk/rusty-melly" }
 
-[dependencies]
-servo = { version = "0.5.0", optional = true }
-smithay = { version = "0.7.0", default-features = false, features = ["desktop", "wayland_frontend"], optional = true }
-smithay-client-toolkit = { version = "0.21.1", optional = true }
-swayipc = { version = "4.0.0", optional = true }
+servo = "0.5.0"
+smithay = { version = "0.7.0", default-features = false, features = ["desktop", "wayland_frontend"] }
+smithay-client-toolkit = "0.21.1"
+swayipc = "4.0.0"

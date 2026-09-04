@@ -1,0 +1,9 @@
+[package]
+name = "melly-adapter-linux"
+version.workspace = true
+edition.workspace = true
+description = "Linux system-service adapter for Melly"
+publish.workspace = true
+
+[dependencies]
+melly-adapter-api.workspace = true

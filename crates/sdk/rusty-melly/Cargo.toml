@@ -1,0 +1,9 @@
+[package]
+name = "rusty-melly"
+version.workspace = true
+edition.workspace = true
+description = "Rust client SDK for the Melly runtime"
+publish.workspace = true
+
+[dependencies]
+melly-protocol.workspace = true

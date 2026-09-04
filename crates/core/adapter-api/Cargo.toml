@@ -1,0 +1,6 @@
+[package]
+name = "melly-adapter-api"
+version.workspace = true
+edition.workspace = true
+description = "Melly-owned contracts for external system adapters"
+publish.workspace = true

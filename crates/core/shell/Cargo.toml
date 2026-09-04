@@ -1,0 +1,9 @@
+[package]
+name = "melly-shell"
+version.workspace = true
+edition.workspace = true
+description = "Reference Melly desktop-shell behavior"
+publish.workspace = true
+
+[dependencies]
+rusty-melly.workspace = true

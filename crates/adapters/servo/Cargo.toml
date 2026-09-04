@@ -1,0 +1,14 @@
+[package]
+name = "melly-adapter-servo"
+version.workspace = true
+edition.workspace = true
+description = "Servo rendering-engine adapter for Melly"
+publish.workspace = true
+
+[features]
+default = []
+servo-engine = ["dep:servo"]
+
+[dependencies]
+melly-adapter-api.workspace = true
+servo = { workspace = true, optional = true }

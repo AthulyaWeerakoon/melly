@@ -1,0 +1,6 @@
+[package]
+name = "melly-protocol"
+version.workspace = true
+edition.workspace = true
+description = "Shared wire-contract primitives for Melly IPC"
+publish.workspace = true

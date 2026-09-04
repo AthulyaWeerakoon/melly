@@ -1,0 +1,16 @@
+[package]
+name = "melly-adapter-smithay"
+version.workspace = true
+edition.workspace = true
+description = "Wayland client and proxy adapter for Melly"
+publish.workspace = true
+
+[features]
+default = []
+client = ["dep:smithay-client-toolkit"]
+proxy = ["dep:smithay"]
+
+[dependencies]
+melly-adapter-api.workspace = true
+smithay = { workspace = true, optional = true }
+smithay-client-toolkit = { workspace = true, optional = true }
