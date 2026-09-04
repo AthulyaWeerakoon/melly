@@ -1,1 +1,21 @@
-/target
+# Rust build output
+/target/
+
+# Local runtime and diagnostic output
+/.melly/
+*.log
+*.profraw
+
+# Local environment overrides
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+/.idea/
+/.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

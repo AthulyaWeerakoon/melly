@@ -12,12 +12,13 @@ This repository implements the native Rust runtime described in `README.md` and 
 2. Promise only semantics Melly can honor reliably. Do not publish a misleading API for behavior that depends on unavailable or inconsistent host support; use a documented optional capability or leave it unexposed.
 3. Keep compositor-specific details behind host adapter/provider boundaries. Do not expose Sway, Labwc, or protocol-specific identifiers through the public JavaScript API.
 4. Keep Servo embedding details behind a narrow engine module. Desktop manifests and host adapters must not depend on Servo types.
-5. Authorize every native JavaScript request before it reaches a host adapter. New capabilities must default to denied.
-6. Preserve recovery outside customizable web content. Never make safe mode or rollback depend exclusively on repository JavaScript.
-7. Treat Git commits as candidate generations, not as automatically trusted active state.
-8. Keep normal desktop-source changes runtime-loaded; do not introduce a Node.js or compilation requirement for desktop repositories.
-9. After normal authorization, route applications that Melly cannot manage safely directly to the host when possible. Mark them host-managed and emit a structured diagnostic. Do not claim Melly support for the bypassed behavior.
-10. Write repository documentation declaratively. State the design, contract, status, constraints, and validation criteria without persuasive comparisons, editorial opinions, or explanations of why a decision is superior.
+5. Do not vendor Servo source or build output into this repository. Use a released `servo` crate selected for the embedding milestone and commit the resolved version in `Cargo.lock`. Keep any source checkout used for upstream investigation outside this repository.
+6. Authorize every native JavaScript request before it reaches a host adapter. New capabilities must default to denied.
+7. Preserve recovery outside customizable web content. Never make safe mode or rollback depend exclusively on repository JavaScript.
+8. Treat Git commits as candidate generations, not as automatically trusted active state.
+9. Keep normal desktop-source changes runtime-loaded; do not introduce a Node.js or compilation requirement for desktop repositories.
+10. After normal authorization, route applications that Melly cannot manage safely directly to the host when possible. Mark them host-managed and emit a structured diagnostic. Do not claim Melly support for the bypassed behavior.
+11. Write repository documentation declaratively. State the design, contract, status, constraints, and validation criteria without persuasive comparisons, editorial opinions, or explanations of why a decision is superior.
 
 ## Rust conventions
 

@@ -10,20 +10,28 @@ Legacy X11 applications are host-managed through the host compositor's XWayland 
 
 ## Status
 
-This repository is an early Rust scaffold. It currently provides a dependency-free command-line placeholder so the build, formatting, linting, and testing workflow is established before graphics or engine dependencies are introduced.
+This repository is an early Rust scaffold. The selected native libraries are locked through Cargo behind implementation-boundary features, but no WebView, Wayland proxy, or Sway adapter is implemented yet:
+
+- `servo-engine`: Servo 0.5.0;
+- `wayland-proxy`: Smithay 0.7.0 with only its desktop and Wayland frontend facilities;
+- `host-sway`: Smithay Client Toolkit 0.21.1 and swayipc 4.0.0.
+
+The command-line placeholder establishes the runtime's formatting, linting, and testing workflow.
 
 The first architectural proof will combine Wayland and Servo narrowly enough to validate one HTML-controlled native surface/window path, input, one semantic action, and live source reload. The rootless proxy direction and Servo embedding are feasibility work; neither is implemented or guaranteed yet.
 
 ## Quick start
 
-Install stable Rust with `rustfmt` and Clippy, then run:
+Install stable Rust through `rustup`. The checked-in toolchain file selects rustfmt, Clippy, rust-src, and rust-analyzer. Then run:
 
 ```sh
 cargo run -- --help
 cargo test
 cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
+cargo clippy --all-targets -- -D warnings
 ```
+
+The default build keeps the early command-line scaffold lightweight. Feature checks enable the downloaded native graphs and require the build prerequisites described in the development guide.
 
 ## Repository responsibilities
 
@@ -37,6 +45,8 @@ This repository will own:
 - safe mode and recovery paths outside user-controlled JavaScript.
 
 Desktop source does not belong here. The companion `melly-desktop` repository contains the no-build example desktop and its manifest.
+
+Third-party source and build output do not belong here either. The runtime declares released Servo, Smithay, Smithay Client Toolkit, and swayipc libraries through Cargo, and `Cargo.lock` records the exact resolved dependency graph.
 
 ## Architecture rules
 

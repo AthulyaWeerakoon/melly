@@ -3,11 +3,34 @@
 ## Prerequisites
 
 - stable Rust through `rustup`;
-- the `rustfmt` and Clippy components;
+- the `rustfmt`, Clippy, rust-src, and rust-analyzer components declared in `rust-toolchain.toml`;
 - Git;
 - native Wayland and Servo prerequisites only when their implementation milestones begin.
 
-Follow current upstream Servo setup documentation when the embedding spike starts. Do not copy an old system-package list into this repository without validating it against the supported Ubuntu and Servo versions.
+Entering this repository lets `rustup` select the declared stable toolchain and components. Install them explicitly when bootstrapping a machine:
+
+```sh
+rustup toolchain install stable --profile minimal \
+  --component rustfmt,clippy,rust-src,rust-analyzer
+```
+
+## Servo dependency model
+
+Servo is an external library dependency and is not copied into this repository. The current embedding baseline declares `servo` 0.5.0 in `Cargo.toml` and commits the exact resolved dependency graph in `Cargo.lock`. The dependency remains optional behind `servo-engine` until the first WebView adapter exists. Cargo stores downloaded dependency source and build caches outside the tracked source tree; `/target/` remains ignored. Servo upgrades are explicit compatibility changes and must update the engine adapter and lockfile together.
+
+An upstream Servo source checkout is needed only for investigation or upstream contribution. Keep that checkout beside this repository, not inside it, and use Servo's own `rust-toolchain.toml` and `./mach bootstrap` workflow. Follow current upstream Servo setup documentation when the embedding spike starts. Validate native package requirements against the supported Ubuntu and Servo versions before recording them here.
+
+## Wayland dependency model
+
+The application-facing server/proxy boundary uses Smithay 0.7.0 through the `wayland-proxy` feature. Only Smithay's `desktop` and `wayland_frontend` features are enabled. Direct DRM, GBM, libinput, libseat, session, X11 backend, and XWayland features remain disabled because the host compositor owns those facilities.
+
+The Sway host boundary uses Smithay Client Toolkit 0.21.1 and swayipc 4.0.0 through the `host-sway` feature. Client Toolkit supplies ordinary Wayland client and layer-shell facilities. swayipc is confined to the Sway adapter and does not enter public Melly contracts.
+
+On Ubuntu, the current `host-sway` dependency slice requires pkg-config and the XKB Common development files:
+
+```sh
+sudo apt install pkg-config libxkbcommon-dev
+```
 
 ## Local checks
 
@@ -15,10 +38,20 @@ Run the same baseline checks before proposing a change:
 
 ```sh
 cargo fmt --check
-cargo clippy --all-targets --all-features -- -D warnings
+cargo clippy --all-targets -- -D warnings
 cargo test
 cargo run -- --help
 ```
+
+The native-boundary checks are:
+
+```sh
+cargo check --locked --features servo-engine
+cargo check --locked --features wayland-proxy,host-sway
+cargo clippy --locked --all-targets --all-features -- -D warnings
+```
+
+Run these checks in a development environment with the native prerequisites and sufficient build storage.
 
 Use `RUST_BACKTRACE=1` while diagnosing runtime failures. Add structured logging before the first graphical prototype so engine, host-adapter, deployment, and JavaScript failures can be distinguished.
 

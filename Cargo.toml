@@ -5,4 +5,14 @@ edition = "2024"
 description = "Native runtime for the Melly programmable Wayland desktop shell"
 publish = false
 
+[features]
+default = []
+host-sway = ["dep:smithay-client-toolkit", "dep:swayipc"]
+servo-engine = ["dep:servo"]
+wayland-proxy = ["dep:smithay"]
+
 [dependencies]
+servo = { version = "0.5.0", optional = true }
+smithay = { version = "0.7.0", default-features = false, features = ["desktop", "wayland_frontend"], optional = true }
+smithay-client-toolkit = { version = "0.21.1", optional = true }
+swayipc = { version = "4.0.0", optional = true }

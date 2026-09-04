@@ -2,6 +2,14 @@
 
 The proposal estimates a 16–22 month MVP at roughly 8–12 focused hours per week. Project tracking uses milestone exit criteria.
 
+## Completed groundwork
+
+- [x] Initialize the Rust application crate and baseline command-line tests.
+- [x] Declare the stable Rust development components used by the repository.
+- [x] Select the released Servo 0.5.0 library and commit its resolved Cargo dependency graph.
+- [x] Select Smithay 0.7.0 for the Wayland proxy boundary and Smithay Client Toolkit 0.21.1 plus swayipc 4.0.0 for the Sway host boundary.
+- [x] Establish repository ignore rules for generated Rust output and local development files.
+
 ## Foundation
 
 - **Tooling and test lab:** reproducible Rust workflow, Ubuntu VM, Sway test session, logs, snapshots, and recovery access.
