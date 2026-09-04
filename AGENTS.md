@@ -23,6 +23,9 @@ This repository implements the native Rust runtime described in `README.md` and 
 13. Use `rusty-melly` as the supported Rust client boundary for both the reference shell and third-party native applications. The shell must not receive a private protocol, implicit authority, or direct dependency on runtime internals.
 14. Treat bypassing the shell as bypassing only the visible shell process. Every client still performs protocol negotiation and passes runtime identity, capability, permission, and policy checks.
 15. Keep shared wire models in `melly-protocol`; keep transport and client ergonomics in `rusty-melly`; keep socket ownership, peer validation, authorization, dispatch, and policy in `melly-runtime`.
+16. Run desktop JavaScript without ambient filesystem, process, service, compositor, socket, or machine-configuration authority. Native effects outside the renderer sandbox must pass through a declared, permission-checked `melly.*` operation.
+17. Define the desktop resource root as the directory containing its manifest entry document. Canonically resolve every loaded document, module, worker, stylesheet, template, font, image, and media path beneath that root, and reject traversal, absolute paths, symlink escapes, and resolution races.
+18. Keep network data authority separate from resource and filesystem authority. Permission-gated AJAX may reach approved localhost or outbound endpoints, but responses must not supply executable source or interface assets. A localhost helper acts only with its own operating-system identity and must never inherit Melly runtime privileges.
 
 ## Rust conventions
 

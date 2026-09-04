@@ -136,4 +136,12 @@ The shell depends on `rusty-melly`, not on runtime internals. The runtime and cl
 
 A desktop repository is executable software with a trusted visual position. Local rendering alone grants no shell execution, arbitrary filesystem access, unrestricted network access, or host control. The bridge checks installed repository identity and approved permissions before routing a request. Host adapters receive only authorized semantic requests.
 
+Desktop JavaScript has no ambient authority to modify source files, arbitrary host files, processes, services, compositor state, sockets, or machine configuration. It may alter its DOM and in-memory state. Every native effect outside the renderer sandbox is expressed as a documented `melly.*` operation and must pass capability, permission, identity, and policy checks.
+
+The directory containing the manifest entry document is the desktop resource root. Documents, modules, workers, stylesheets, templates, fonts, images, media, and other interface resources must canonically resolve to files inside that root. Candidate validation and runtime loading reject absolute filesystem paths, parent traversal, symlink escapes, redirects or encoded variants that leave the root, and time-of-check/time-of-use path substitutions. The final loader must use race-resistant path resolution rather than trusting string-prefix checks.
+
+Network access is independent authority. A desktop with explicit network permission may issue AJAX requests to approved localhost or outbound endpoints for data, while remote scripts, modules, styles, markup, fonts, images, templates, and other interface assets remain prohibited. Responses are handled as untrusted data and do not expand filesystem or native authority.
+
+A localhost helper is a separate application boundary. It authenticates and authorizes requests independently and acts with its own operating-system identity and permissions when changing desktop or other files. Melly does not lend, proxy, or delegate runtime privileges through a localhost request, and localhost is not implicitly trusted.
+
 Git is the source and transaction history, not the security boundary. Validation, permission approval, isolation, health checks, atomic activation, and external recovery enforce deployment safety.

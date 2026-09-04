@@ -17,6 +17,7 @@ The proposal estimates a 16–22 month MVP at roughly 8–12 focused hours per w
 
 - **Tooling and test lab:** reproducible Rust workflow, Ubuntu VM, Sway test session, logs, snapshots, and recovery access.
 - **Contract slice:** specify the smallest versioned HTML/DOM/`melly.*` environment that every supported backend must honor, including explicit preview and unsupported-operation behavior.
+- **Renderer sandbox:** deny ambient host authority, confine all interface resources to the canonical desktop root, separate AJAX data permissions from asset loading, and test traversal, symlink, redirect, encoding, and path-resolution races.
 - **IPC slice:** specify framing, handshake, peer identity, permission/capability enforcement, requests, events, cancellation, limits, reconnect behavior, and compatibility for `melly-protocol` and `rusty-melly`.
 - **Wayland foundations:** learn client/server/session concepts and build narrow probes for both host-facing surfaces and the application-facing proxy direction.
 - **Servo feasibility:** render and interact with one Servo WebView on a shell surface, measure resource use and latency, and decide whether the integration works without a large permanent fork.
@@ -59,3 +60,4 @@ The proposal estimates a 16–22 month MVP at roughly 8–12 focused hours per w
 6. Clean VM session installation and external recovery must be repeatable.
 7. A second backend must work without restructuring the public contract, even if internal adapters differ.
 8. X11 and every bypassed case must remain host-usable where the reference host supports it, with an observable reason that Melly management was declined.
+9. Desktop JavaScript must be unable to escape the renderer sandbox or load an interface resource outside the canonical desktop root through any supported loading mechanism.
