@@ -49,3 +49,7 @@ Preserve these conceptual areas even if internal modules change:
 - `crates/adapters/*`: concrete external integrations such as Sway, Servo, Smithay, Git, SQLite, and Linux services.
 
 Update the corresponding documentation whenever a public contract, manifest assumption, security rule, or milestone changes.
+
+## Requested open-source quality review
+
+When asked to assess open-source quality or independent-contribution readiness, use the repository skill at `.agents/skills/melly-open-source-review/SKILL.md`. It is a report-only review of names, applicable standards, test evidence, README accuracy, and contributor/release quality; ordinary implementation work does not automatically trigger a full audit.

@@ -67,3 +67,5 @@ See the [workspace map](docs/workspace.md), [local IPC contract](docs/ipc.md), [
 ## Contributing
 
 Read [AGENTS.md](AGENTS.md) before changing the codebase. Keep changes focused on the current milestone and include tests for behavior that can be exercised without a live compositor.
+
+For an evidence-based open-source quality audit, invoke the repo-local `melly-open-source-review` skill from this repository (for example, ask an agent to “use melly-open-source-review on melly-runtime”). It reports findings and contribution readiness without changing source.
