@@ -1,6 +1,6 @@
 //! Public Rust client SDK for communicating with the Melly runtime.
 //!
-//! The reference shell and third-party native applications use this same
+//! The shell and third-party native applications use this same
 //! boundary. Connecting directly bypasses the shell process, not runtime
 //! authentication, permission checks, capability checks, or policy.
 
@@ -66,6 +66,8 @@ impl Client {
 #[cfg(test)]
 mod tests {
     use super::ClientBuilder;
+    use std::io::ErrorKind;
+    use std::os::unix::net::UnixListener;
     use std::path::Path;
 
     #[test]
@@ -75,5 +77,27 @@ mod tests {
             builder.socket_path,
             Path::new("/run/user/1000/melly/test.sock")
         );
+    }
+
+    #[test]
+    fn connects_to_an_explicit_socket_in_a_private_test_directory() {
+        let directory = tempfile::tempdir().unwrap();
+        let socket_path = directory.path().join("runtime.sock");
+        let _listener = UnixListener::bind(&socket_path).unwrap();
+
+        let client = ClientBuilder::with_socket_path(&socket_path)
+            .connect()
+            .unwrap();
+        assert_eq!(client.socket_path(), socket_path.as_path());
+        assert!(client.peer_addr().is_ok());
+    }
+
+    #[test]
+    fn missing_socket_reports_a_connection_error() {
+        let directory = tempfile::tempdir().unwrap();
+        let error = ClientBuilder::with_socket_path(directory.path().join("missing.sock"))
+            .connect()
+            .unwrap_err();
+        assert_eq!(error.kind(), ErrorKind::NotFound);
     }
 }

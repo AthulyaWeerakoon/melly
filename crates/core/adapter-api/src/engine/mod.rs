@@ -1,1 +1,1 @@
-//! Rendering-engine operations required by Melly shell surfaces.
+//! Rendering-engine operations required by Melly desktop-host surfaces.

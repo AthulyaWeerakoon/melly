@@ -2,7 +2,7 @@
 
 ## Product contract
 
-Melly is a programmable Linux desktop environment whose customization contract is HTML, CSS, and JavaScript. Normal web-platform concepts remain normal web-platform concepts; Melly adds semantic elements, attributes, events, and `melly.*` JavaScript operations only where desktop behavior has no suitable web equivalent.
+Melly is a programmable Linux desktop environment whose customization contract is HTML, CSS, and JavaScript. Normal web-platform concepts remain normal web-platform concepts. `melly.*` describes Melly itself, including environment, granted permissions, configuration, and runtime status. `desktop.*` exposes the programmable scene and client surfaces. Permission-gated `system.*` exposes operating-system services. Servo is the web runtime and Smithay supplies the application-facing Wayland server machinery.
 
 The contract is:
 
@@ -10,7 +10,7 @@ The contract is:
 
 Every exposed feature must be expressible through the desktop source contract and follow a documented semantic guarantee. Host behavior without a reliable abstraction remains optional behind a capability, diagnostic-only, or outside the public API.
 
-Desktop authors customize Melly-owned interface behavior through HTML, CSS, and JavaScript. Wayland protocol code, compositor IPC, D-Bus, shell commands, Rust, and compositor configuration are outside the authoring contract. Packaging and permission metadata covers installation and authority only; it is not a visual-layout or interaction language.
+Desktop authors customize Melly-owned interface behavior through HTML, CSS, and JavaScript. Wayland protocol code, compositor IPC, D-Bus, shell commands, Rust, and compositor configuration are outside the authoring contract. Packaging and permission metadata covers installation and authority only; it is not a visual-layout or interaction language. The design target places approximately 90% of visible desktop UI policy inside this programmable scene; application-owned pixels and physical hardware state remain external constraints.
 
 ## Durable boundaries
 
@@ -20,39 +20,42 @@ HTML + CSS + JavaScript
         |
         v
 Melly public contract
-DOM/web behavior + Melly semantics + melly.* + capabilities
+DOM/web behavior + melly.* + desktop.* + system.*
         |
         v
-Melly runtime internals
-Servo boundary + Wayland mediation + permissions + generations + recovery
+Melly Core and scene
+Servo layout + client surfaces + input routing + permissions + generations
         |
         v
-Host integration
-standard Wayland + host adapters + selected Linux services
+Application-facing Wayland server
+Smithay + xdg-shell + native Wayland client lifecycle
         |
         v
-Host compositor / operating system / hardware
+Display-host presentation
+standard Wayland client + Sway/KWin/Labwc + operating system/hardware
 ```
 
-The public contract remains stable across changes between standard Wayland protocols, an application-facing proxy, host adapters, and other Linux subsystems.
+The public contract remains stable across changes to standard Wayland protocols, display-host adapters, and other Linux subsystems.
 
-### Runtime and shell process boundary
+### Runtime, command shell, and desktop host boundary
 
-The runtime and shell communicate through a per-user Unix-domain socket at `$XDG_RUNTIME_DIR/melly/runtime.sock`. The runtime owns the socket server, client identity, authorization, capability checks, command dispatch, events, and policy. The socket is ephemeral login-session state and is not stored in a repository, installation directory, persistent data directory, or shared temporary directory.
+The runtime and native clients communicate through a per-user Unix-domain socket at `$XDG_RUNTIME_DIR/melly/runtime.sock`. The runtime owns the socket server, client identity, authorization, capability checks, command dispatch, events, and policy. The socket is ephemeral login-session state and is not stored in a repository, installation directory, persistent data directory, or shared temporary directory.
 
-`rusty-melly` is the supported Rust client SDK for this boundary. The reference `melly-shell` uses it as an ordinary runtime client. Third-party native applications may use the same SDK to communicate directly with the runtime without routing through the shell process.
+`rusty-melly` is the supported Rust client SDK for this boundary. The Melly command shell uses it as an ordinary runtime client to control Melly. Third-party native applications may use the same SDK without routing through the command shell. The desktop host is a distinct presentation process that embeds Servo, displays the desktop HTML/CSS/JavaScript, and supplies the three JavaScript namespaces. It may use the same SDK where a runtime client boundary is required, but it does not become the command shell.
 
-Bypassing the shell does not bypass Melly. Direct clients still negotiate the versioned protocol and pass runtime identity, capability, permission, and policy checks. The shell receives no private protocol or implicit authority. Shared wire primitives belong to `melly-protocol`; client transport and ergonomics belong to `rusty-melly`; server and policy behavior belong to `melly-runtime`.
+Bypassing the command shell does not bypass Melly. Direct clients still negotiate the versioned protocol and pass runtime identity, capability, permission, and policy checks. The command shell receives no private protocol or implicit authority. Shared wire primitives belong to `melly-protocol`; client transport and ergonomics belong to `rusty-melly`; server and policy behavior belong to `melly-runtime`. These checks are design requirements, not features of the current connection-only SDK.
 
-The desktop HTML/CSS/JavaScript does not access the Unix socket. Its native boundary remains the permission-checked `melly.*` bridge exposed by the shell environment.
+The desktop HTML/CSS/JavaScript does not access the Unix socket. Its native boundaries are `melly.*` for Melly self-description and configuration, `desktop.*` for scene interaction, and `system.*` for permission-gated operating-system services. Existing web concepts continue to use standard web APIs.
 
 ### Engine boundary
 
 The future `MellyWebEngine` abstraction owns WebView creation, rendering, input delivery, resize/focus behavior, lifecycle, and local resource loading. Only this layer tracks Servo embedding API changes. Servo supplies the ordinary HTML/CSS/JavaScript environment. Melly extensions remain within that environment and do not form a parallel UI dialect.
 
+The engine adapter may use available GPU rendering and compositing. Melly does not force a software renderer globally; an engine may select a software fallback when the graphics stack lacks a usable accelerated path. The desktop host and bridge coordinate surfaces and authorized operations without duplicating the engine's HTML/CSS layout or frame rendering work. Renderer evaluation covers ordinary browser output, the embedded engine, native client-surface interaction, and a software fallback at comparable viewport sizes.
+
 ### JavaScript and DOM boundary
 
-Desktop code requests native intent through host-neutral `melly.*` operations and documented Melly-specific DOM elements, attributes, and events. Inputs, outputs, errors, object identities, and event names describe Melly domain concepts and do not expose Sway containers, raw Wayland objects, or another backend's wire format.
+Desktop code uses documented DOM elements, attributes, events, and `desktop.*` operations for scene and client-surface semantics. `melly.*` is reserved for Melly's own environment, granted permissions, configuration, and runtime state. Files, application inventory and launch, audio, power, devices, and similar operating-system services belong under `system.*` when no standard web API fits. All three namespaces remain semantic and host-neutral; they do not expose Sway containers, raw Wayland objects, D-Bus messages, commands, or backend wire formats.
 
 The eventual versioned contract should distinguish:
 
@@ -62,34 +65,37 @@ The eventual versioned contract should distinguish:
 
 Capability checks are not permission grants. Every supported backend implements the minimum Melly contract. Backends that cannot implement it are unsupported.
 
-### Application-facing Wayland direction
+### Application-facing Wayland architecture
 
-A rootless Wayland proxy/compositor is the current direction for Melly-managed application-window lifecycle, HTML-controlled chrome, application-surface placement, and input routing. Native Wayland applications connect to Melly, and Melly creates ordinary windows under an existing host compositor.
+A rootless/nested Wayland compositor is the Melly application model. Native Wayland applications connect to Melly. The display host sees Melly's presentation surface or surfaces rather than managing each application as an independent host window.
 
-A Melly window domain object associates application state, a client surface, HTML decoration, and a host toplevel. Smithay is a candidate for Wayland server machinery. Servo is the intended web engine.
+A `ClientSurface` represents application-owned presentation content. It is the fundamental foreign-UI primitive exposed to the desktop scene. Smithay handles the underlying Wayland surfaces, subsurfaces, `xdg_toplevel` and popup lifecycle, configure cycles, buffers, seats, focus, clipboard, drag-and-drop, and input protocol state. Servo supplies the surrounding document, layout, CSS, JavaScript, DOM, and web storage.
 
-These are implementation choices to validate, not promises to desktop authors. Prototype evidence may refine the topology, dependency choices, buffer path, and WebView strategy without weakening or renaming the public customization contract.
+The HTML bridge is the `<client-surface>` custom element. Servo layout assigns its geometry; Melly configures the corresponding Wayland client and presents the application buffer inside that region. A reference desktop may wrap it in conventional HTML window chrome, place it in a CSS grid, or use another visual model. Conventional windows, workspaces, tiling, floating, title bars, docks, and launchers are not mandatory Melly Core primitives.
 
-### Managed and host-managed applications
+### Application support boundary
 
-Melly distinguishes compatibility from managed support:
+Melly supports native Wayland applications that connect through its application-facing server and can participate in the Melly scene. Unsupported protocols fail explicitly; Melly does not silently route their clients directly to the display host.
 
-- A **Melly-managed** application passes through the validated Melly application boundary and may receive the documented Melly window model, HTML chrome, events, and controls.
-- A **host-managed** application connects directly to the host path. It remains usable, but Melly does not claim window mediation or other managed features for it.
+X11 and host-owned XWayland bypass are not supported. A future X11 compatibility design would require a Melly-owned XWayland path whose surfaces enter the same client-surface model. It is outside the current contract and implementation scope.
 
-Legacy X11 applications are host-managed from the first version. On the Sway reference host, Sway's XWayland support runs them directly. Melly does not proxy X11 or implement XWayland in the first version.
+### Scene and input routing
 
-Application types, Wayland protocols, surface roles, and runtime conditions that the current Melly version cannot mediate safely use host-managed routing when authorized and supported by the host. Each routing decision is recorded in the structured compatibility log with the application identity when known, detected protocol or case, bypass reason, and relevant missing capability.
+Servo layout participates directly in desktop composition policy. For each client-surface element, Melly reads the laid-out region, configures the Wayland client to the corresponding size, clips and composes its submitted buffer into the scene, and updates it when layout changes.
 
-Host-managed applications are compatible but outside the full Melly support contract. They are absent from managed collections unless a future, explicitly limited diagnostic model includes them. Partial behavior is not represented as the full contract.
+Pointer and keyboard input are routed according to the scene hit test. Input over ordinary HTML is delivered to Servo and the DOM. Input over a client-surface region is translated into the application-facing Wayland seat and delivered to that client. Focus, popups, cursor state, clipboard, and drag-and-drop remain coordinated Core responsibilities rather than desktop-author configuration.
 
-The fallback does not bypass launch authorization, permissions, sandbox policy, or host security. It also never means falling back from a failed JavaScript API call to arbitrary shell execution or compositor IPC.
+### Web storage and source identity
+
+Standard `sessionStorage`, `localStorage`, `IndexedDB`, and `navigator.storage` semantics are the default desktop persistence interface where Servo supports them. Persistent storage is tied to stable installed desktop identity so it survives reloads, restarts, reboots, and Git generation swaps. It lives outside individual source generations.
+
+Browser storage holds private UI and application state; it is not the authority for live client surfaces, outputs, installed applications, devices, or user files. Git stores desktop source. The normal user filesystem remains separate and requires an explicit permission-checked native API.
 
 ### Authority boundaries
 
 - Applications remain authoritative for their content and application-specific state.
 - Melly is authoritative for Melly-owned interface surfaces, exposed domain objects, permissions, capabilities, desktop-source generations, and recovery policy.
-- The host compositor remains authoritative for physical/global placement, global focus, actual output arrangement, system composition, physical input policy, and all host-managed applications unless a supported protocol explicitly delegates a semantic operation.
+- The display host remains authoritative for physical outputs, actual output arrangement, device hotplug, GPU/display ownership, DRM/KMS, refresh, hardware presentation, and physical input devices.
 - The kernel and hardware remain authoritative for GPUs, displays, and input devices.
 
 ## Promise discipline
@@ -103,7 +109,7 @@ Before adding a public feature, document and test:
 5. whether browser preview can simulate it clearly without pretending a native action occurred;
 6. how backend-specific data is prevented from leaking into the contract.
 
-Known host limitations appear as explicit state, structured errors, absent capabilities, or logged host-managed routing decisions. Baseline X11 compatibility uses the host's XWayland path and does not include Melly-managed X11 windows. Uniform minimize/maximize behavior, client-decoration suppression, output control, managed XWayland integration, zero-copy composition, and other unproven integrations remain outside the contract.
+Known limitations appear as explicit state, structured errors, or absent capabilities. X11 compatibility, managed XWayland integration, output control, zero-copy composition, and other unimplemented integrations remain outside the contract. Client-requested maximize and fullscreen state remain protocol realities, while their visual presentation is desktop policy expressed through HTML/CSS/JavaScript where the protocol permits.
 
 ## Runtime flows
 
@@ -128,15 +134,15 @@ The runtime retains current, previous, known-good, and factory-safe recovery opt
 
 ## Dependency direction
 
-Core coordination may depend on Melly-owned engine, bridge, Wayland, host, deployment, and IPC contracts. Concrete Servo, proxy, protocol, and compositor adapters implement those contracts. Public contracts must not import implementation-specific types in the opposite direction.
+Core coordination may depend on Melly-owned engine, bridge, Wayland, host, deployment, and IPC contracts. Concrete Servo, Wayland-server, protocol, and display-host adapters implement those contracts. Public contracts must not import implementation-specific types in the opposite direction.
 
-The shell depends on `rusty-melly`, not on runtime internals. The runtime and client SDK depend on shared `melly-protocol` wire primitives. `rusty-melly` does not depend on the reference shell, compositor adapters, or rendering-engine adapters.
+The command shell depends on `rusty-melly`, not on runtime internals. The runtime and client SDK depend on shared `melly-protocol` wire primitives. `rusty-melly` does not depend on the command shell, desktop host, compositor adapters, or rendering-engine adapters.
 
 ## Security boundary
 
 A desktop repository is executable software with a trusted visual position. Local rendering alone grants no shell execution, arbitrary filesystem access, unrestricted network access, or host control. The bridge checks installed repository identity and approved permissions before routing a request. Host adapters receive only authorized semantic requests.
 
-Desktop JavaScript has no ambient authority to modify source files, arbitrary host files, processes, services, compositor state, sockets, or machine configuration. It may alter its DOM and in-memory state. Every native effect outside the renderer sandbox is expressed as a documented `melly.*` operation and must pass capability, permission, identity, and policy checks.
+Desktop JavaScript has no ambient authority to modify source files, arbitrary host files, processes, services, compositor state, sockets, or machine configuration. It may alter its DOM and in-memory state. Every native effect outside the renderer sandbox is expressed through a documented API in the appropriate namespace and must pass capability, fine-grained manifest permission, identity, and policy checks.
 
 The directory containing the manifest entry document is the desktop resource root. Documents, modules, workers, stylesheets, templates, fonts, images, media, and other interface resources must canonically resolve to files inside that root. Candidate validation and runtime loading reject absolute filesystem paths, parent traversal, symlink escapes, redirects or encoded variants that leave the root, and time-of-check/time-of-use path substitutions. The final loader must use race-resistant path resolution rather than trusting string-prefix checks.
 

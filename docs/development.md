@@ -22,7 +22,7 @@ An upstream Servo source checkout is needed only for investigation or upstream c
 
 ## Wayland dependency model
 
-The application-facing server/proxy boundary uses Smithay 0.7.0 through the `wayland-proxy` feature. Only Smithay's `desktop` and `wayland_frontend` features are enabled. Direct DRM, GBM, libinput, libseat, session, X11 backend, and XWayland features remain disabled because the host compositor owns those facilities.
+The application-facing Wayland server boundary uses Smithay 0.7.0 through the `wayland-server` feature. Only Smithay's `desktop` and `wayland_frontend` features are enabled. Direct DRM, GBM, libinput, libseat, session, X11 backend, and XWayland features remain disabled. The display host owns hardware facilities; X11 is not supported.
 
 The Sway host boundary uses Smithay Client Toolkit 0.21.1 and swayipc 4.0.0 through the `host-sway` feature. Client Toolkit supplies ordinary Wayland client and layer-shell facilities. swayipc is confined to the Sway adapter and does not enter public Melly contracts.
 
@@ -37,9 +37,9 @@ sudo apt install pkg-config libxkbcommon-dev
 Run the same baseline checks before proposing a change:
 
 ```sh
-cargo fmt --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
+cargo fmt --all --check
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo test --workspace --locked
 cargo run -- --help
 ```
 
@@ -47,7 +47,7 @@ The native-boundary checks are:
 
 ```sh
 cargo check --locked --features servo-engine
-cargo check --locked --features wayland-proxy,host-sway
+cargo check --locked --features wayland-server,host-sway
 cargo clippy --locked --all-targets --all-features -- -D warnings
 ```
 
@@ -57,14 +57,14 @@ Use `RUST_BACKTRACE=1` while diagnosing runtime failures. Add structured logging
 
 ## Runtime client development
 
-The shell and native application clients use `rusty-melly`. The default endpoint resolves to `$XDG_RUNTIME_DIR/melly/runtime.sock`; do not create sockets in this checkout, `/tmp`, persistent state directories, or shared storage.
+The command shell and native application clients use `rusty-melly`. The default endpoint resolves to `$XDG_RUNTIME_DIR/melly/runtime.sock`; do not create sockets in this checkout, `/tmp`, persistent state directories, or shared storage. The current SDK opens a socket only; no command protocol or server exists yet.
 
 Keep protocol work split across these ownership boundaries:
 
 - `melly-protocol` for shared versioned wire primitives;
 - `rusty-melly` for client connection, framing, requests, events, and reconnect behavior;
 - `melly-runtime` for the server, peer credentials, identity, authorization, policy, routing, and diagnostics;
-- `melly-shell` for shell behavior through the public SDK.
+- `melly-shell` for command-shell behavior through the public SDK, without desktop rendering ownership.
 
 Tests may supply an explicit socket path inside a private temporary directory. Production code uses the standard per-login endpoint. Do not make an explicit override a permission bypass.
 
@@ -72,18 +72,12 @@ Tests may supply an explicit socket path inside a private temporary directory. P
 
 Develop session-level integration in a KVM/QEMU Ubuntu VM with snapshots. Keep a known working desktop session and TTY access available. Test Sway independently before adding Melly, and do not install display-manager session files on a primary machine until VM login, logout, failure, and uninstall paths are repeatable.
 
-Suggested snapshot points are:
-
-1. clean tooling and Sway setup;
-2. first layer-shell surface;
-3. first interactive Servo surface;
-4. first native JavaScript operation;
-5. first Melly login session;
-6. first transactional Git activation.
+The production desktop host is Rust code using Servo. Do not add Python, WebKitGTK, browser-command, or unrelated renderer implementations as committed examples or fallbacks. A test session may supervise the built Melly executable only after independent terminal, TTY, SSH, and alternate-login recovery are verified.
 
 ## Change discipline
 
-- Keep learning spikes small and write down results, especially go/no-go evidence.
+- Keep implementation probes within the intended Rust engine, desktop-host, and runtime boundaries so their tests and contracts can migrate into production. Keep disposable local trials outside the Git repository.
 - Measure startup time, steady memory, idle CPU wakeups, and input/frame latency during the Servo spike.
+- Exercise the Servo adapter with the engine's available GPU path and a software fallback; do not treat performance of a software-only VM as representative of accelerated desktop rendering.
 - Add fixtures for host messages rather than requiring a live compositor for every test.
 - Update docs when a boundary or safety invariant changes.

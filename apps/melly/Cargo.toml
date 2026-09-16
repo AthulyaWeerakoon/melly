@@ -14,7 +14,7 @@ host-sway = [
     "melly-adapter-sway/sway-ipc",
 ]
 servo-engine = ["dep:melly-adapter-servo", "melly-adapter-servo/servo-engine"]
-wayland-proxy = ["dep:melly-adapter-smithay", "melly-adapter-smithay/proxy"]
+wayland-server = ["dep:melly-adapter-smithay", "melly-adapter-smithay/server"]
 
 [dependencies]
 melly-adapter-api.workspace = true

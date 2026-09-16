@@ -1,6 +1,6 @@
 # Local IPC contract
 
-Melly uses a Unix-domain socket for local communication between the runtime and approved clients. The reference shell is one such client. Native applications may connect through `rusty-melly` without using the shell process.
+Melly uses a Unix-domain socket for local communication between the runtime and approved native clients. The Melly command shell is one such client. Native applications may connect through `rusty-melly` without using the command-shell process. Desktop HTML/JavaScript does not connect to the socket.
 
 ## Socket location and lifecycle
 
@@ -35,9 +35,9 @@ The socket protocol carries Melly semantic operations and canonical models. It d
 - `melly-protocol` defines shared versioned wire primitives and compatibility rules.
 - `rusty-melly` owns connection setup, protocol framing, request/response handling, subscriptions, and Rust client ergonomics.
 - `melly-runtime` owns the server, peer validation, authorization, routing, policy, and diagnostics.
-- `melly-shell` uses `rusty-melly` and receives no privileged private transport.
+- The `melly-shell` command client uses `rusty-melly` and receives no privileged private transport; it does not render the desktop.
 
-The HTML/CSS/JavaScript desktop does not open this socket. Its native requests use the permission-checked `melly.*` bridge provided by the shell environment.
+The HTML/CSS/JavaScript desktop does not open this socket. Its native requests use the desktop host's `melly.*`, `desktop.*`, and permission-checked `system.*` bridges.
 
 ## Current status
 

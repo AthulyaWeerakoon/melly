@@ -7,3 +7,6 @@ publish.workspace = true
 
 [dependencies]
 melly-protocol.workspace = true
+
+[dev-dependencies]
+tempfile = "3.27.0"

@@ -2,7 +2,7 @@
 name = "melly-shell"
 version.workspace = true
 edition.workspace = true
-description = "Reference Melly desktop-shell behavior"
+description = "Melly command-shell client scaffold"
 publish.workspace = true
 
 [dependencies]

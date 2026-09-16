@@ -2,13 +2,13 @@
 name = "melly-adapter-smithay"
 version.workspace = true
 edition.workspace = true
-description = "Wayland client and proxy adapter for Melly"
+description = "Application-facing Wayland server and display-host client adapter for Melly"
 publish.workspace = true
 
 [features]
 default = []
 client = ["dep:smithay-client-toolkit"]
-proxy = ["dep:smithay"]
+server = ["dep:smithay"]
 
 [dependencies]
 melly-adapter-api.workspace = true

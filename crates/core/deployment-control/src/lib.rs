@@ -7,6 +7,3 @@ pub mod repository;
 pub mod revisions;
 pub mod rollback;
 pub mod validation;
-
-/// Identifies the current implementation stage without defining deployment policy.
-pub const STATUS: &str = "scaffold";

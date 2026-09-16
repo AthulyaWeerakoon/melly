@@ -45,14 +45,14 @@ mod tests {
     #[test]
     fn accepts_host_neutral_capability_names() {
         assert_eq!(
-            CapabilityId::new("workspaces.control").unwrap().as_str(),
-            "workspaces.control"
+            CapabilityId::new("client-surfaces.focus").unwrap().as_str(),
+            "client-surfaces.focus"
         );
     }
 
     #[test]
     fn rejects_empty_segments_and_native_names() {
-        assert!(CapabilityId::new("workspaces..control").is_err());
+        assert!(CapabilityId::new("client-surfaces..focus").is_err());
         assert!(CapabilityId::new("Sway.command").is_err());
     }
 }
